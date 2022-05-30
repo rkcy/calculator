@@ -47,6 +47,12 @@ pipeline {
           sh "docker build -t rkcy/calculator ."
         }
        }
+
+       stage("Docker push") {
+        steps {
+          sh "docker push rkcy/calculator"
+        }
+       }
     }
 
 }
