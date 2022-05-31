@@ -5,6 +5,13 @@ pipeline {
        pollSCM('* * * * *')
     }
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('rkcy-dockerhub')
+    }
+
     stages {
       stage("Compile") {
         steps {
@@ -48,11 +55,22 @@ pipeline {
         }
        }
 
-       stage("Docker push") {
+      stage('Docker Login') {
+         steps {
+            sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+         }
+      }
+
+      stage('Docker Push') {
         steps {
-          sh "docker push rkcy/calculator"
+          sh 'docker push rkcy/calculator:latest'
         }
-       }
+      }
     }
 
+  post {
+    always {
+      sh 'docker logout'
+    }
+  }
 }
