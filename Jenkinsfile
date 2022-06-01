@@ -66,11 +66,26 @@ pipeline {
           sh 'docker push rkcy/calculator:latest'
         }
       }
+
+      stage('Deploy to staging') {
+        steps {
+          sh 'docker run -d --rm -p 8765:8080 --name calculator rkcy/calculator'
+        }
+      }
+
+      stage('Acceptance test') {
+        steps {
+          sleep 60
+           sh 'chmod +x acceptance_test.sh && ./acceptance_test.sh'
+        }
+      }
+
     }
 
   post {
     always {
       sh 'docker logout'
+      sh 'docker stop calculator'
     }
   }
 }
